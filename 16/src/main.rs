@@ -1,5 +1,7 @@
 use std::{fs::read_to_string, collections::HashSet};
 
+use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 struct Pos {
     row: usize,
@@ -173,18 +175,21 @@ fn main() {
 
     println!("result 1: {}", simulate(&input, WorksetEntry::new((0, 0), (0, 1))));
 
-    // Part 2 (brute force, runs in roughly a second on my laptop)
-    let mut max = 0;
+    // Part 2 (brute force, runs in roughly a second on my laptop single threaded, 200ms parallelized with)
+
+    let mut initials = Vec::new();
 
     for row_idx in 0..input.len() {
-        max = std::cmp::max(max, simulate(&input, WorksetEntry::new((row_idx, 0), (0, 1))));
-        max = std::cmp::max(max, simulate(&input, WorksetEntry::new((row_idx, input[row_idx].len() - 1), (0, -1))));
+        initials.push(WorksetEntry::new((row_idx, 0), (0, 1)));
+        initials.push(WorksetEntry::new((row_idx, input[row_idx].len() - 1), (0, -1)));
     }
 
     for col_idx in 0..input[0].len() {
-        max = std::cmp::max(max, simulate(&input, WorksetEntry::new((0, col_idx), (1, 0))));
-        max = std::cmp::max(max, simulate(&input, WorksetEntry::new((input.len() - 1, col_idx), (-1, 0))));
+        initials.push(WorksetEntry::new((0, col_idx), (1, 0)));
+        initials.push(WorksetEntry::new((input.len() - 1, col_idx), (-1, 0)));
     }
 
-    println!("result 2: {}", max);
+    let result2 = initials.par_iter().map(|initial| simulate(&input, *initial)).max();
+
+    println!("result 2: {}", result2.unwrap());
 }
