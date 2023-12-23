@@ -1,6 +1,6 @@
 use std::{fs::read_to_string, collections::{VecDeque, HashMap}};
 
-use petgraph::{graph::DiGraph, graph::NodeIndex, dot::{Dot, Config}};
+use petgraph::{graph::DiGraph, graph::NodeIndex};
 
 // We take out all of the single way paths and connect junctions in a graph
 fn construct_graph_bfs(grid: &Vec<Vec<char>>) -> (NodeIndex, NodeIndex, DiGraph<(usize, usize), usize>) {
